@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, redirect, request, render_template
-from models import db, connect_db, User
+from models import DEFAULT_IMAGE_URL, db, connect_db, User, Post
 from seed import seed_database
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -18,7 +18,7 @@ connect_db(app)
 
 seed_database(db)
 
-empty_user = User(img_url="")
+empty_user = User(first_name="", last_name="", img_url="")
 
 
 @app.get("/")
@@ -49,8 +49,18 @@ def show_add_user():
 @app.post("/users/new")
 def add_new_user():
     """Adds new user to database"""
+    first_name = request.form["first_name"]
+    last_name = request.form["last_name"]
+    img_url = request.form["img_url"] if request.form["img_url"] != "" else None
 
-    add_user(request.form)
+    new_user = User(
+        first_name=first_name,
+        last_name=last_name,
+        img_url=img_url
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
 
     return redirect("/users")
 
@@ -61,7 +71,7 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template("user_detail.html", user=user)
+    return render_template("user_detail.html", user=user, posts=user.posts)
 
 
 @app.get("/users/<int:user_id>/edit")
@@ -76,58 +86,47 @@ def show_edit_user(user_id):
                            action=action_type)
 
 
-@app.post("/users/<user_id>/edit")
+@app.post("/users/<int:user_id>/edit")
 def edit_user(user_id):
     """Edits user data"""
 
-    edit_user(request.form, user_id)
+    user = User.query.get_or_404(user_id)
+
+    user.first_name = request.form["first_name"]
+    user.last_name = request.form["last_name"]
+    user.img_url = request.form["img_url"] if request.form["img_url"] != "" else DEFAULT_IMAGE_URL
+
+    db.session.commit()
 
     return redirect("/users")
 
 
-@app.post("/users/<user_id>/delete")
+@app.post("/users/<int:user_id>/delete")
 def delete_user(user_id):
     """Removes user data from db"""
 
-    User.query.filter(User.id == user_id).delete()
+    user = User.query.filter(User.id == user_id).first()
 
-    db.session.commit()
-
-    return redirect("/users")
-
-
-def add_user(user_data):
-    """takes array of user data, and creates new User
-    object, adding to db"""
-
-    if user_data["img_url"] == "":
-        new_user = User(
-            first_name=user_data["first_name"],
-            last_name=user_data["last_name"]
-        )
+    if not user:
+        return redirect("/users")
     else:
-        new_user = User(
-            first_name=user_data["first_name"],
-            last_name=user_data["last_name"],
-            img_url=user_data["img_url"]
-        )
+        user.posts.clear()
+        # user.query.delete()
+        db.session.delete(user)
+        db.session.commit()
 
-    db.session.add(new_user)
-    db.session.commit()
+        return redirect("/users")
 
 
-def edit_user(new_user_data, user_id):
-    """Queries db for user_id, alters information
-    based on passed new_user_data"""
+@app.get("/posts/<int:post_id>")
+def show_post(post_id):
+    """shows post page"""
 
-    user = User.query.get_or_404(user_id)
+    post = Post.query.get_or_404(post_id)
 
-    user.first_name = new_user_data["first_name"]
-    user.last_name = new_user_data["last_name"]
+    return render_template("post.html", post=post, user_id=post.user_id)
 
-    if new_user_data != "":
-        user.img_url = new_user_data["img_url"]
-    else:
-        user.img_url = "/static/default_pic.png"
 
-    db.session.commit()
+@app.get("/users/<int:user_id>/posts/new")
+def show_add_post(user_id):
+    return

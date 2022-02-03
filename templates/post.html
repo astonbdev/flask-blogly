@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}{{post.title}}{% endblock %}
+
+{% block content %}
+
+<h1>{{ post.title }}</h1>
+<p> {{post.content}}</p>
+
+<div id="post-handler-form">
+    <form>
+        <button class="btn btn-secondary"
+                id="cancel"
+                formaction="/users/{{user_id}}">Back</button>
+        <button class="btn btn-primary"
+                id="edit"
+                formaction="/posts/{{post.id}}/edit">Edit</button>
+        <button class="btn btn-danger"
+                id="delete"
+                formaction="/posts/{{post_id}}/delete"
+                formmethod="POST">Delete</button>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from email.mime import image
-from models import User
+from models import User, Post
 
 
 def seed_database(db):
@@ -24,6 +24,14 @@ def seed_database(db):
     db.session.add(brian)
     db.session.add(friend_one)
     db.session.add(friend_two)
+
+
+    #Make some posts
+    brian_post_1 = Post(title="First!", content="Some stuff is written here", user_id = 1)
+    brian_post_2 = Post(title="Second!", content="Is this an echo chamber?", user_id = 1)
+
+    db.session.add(brian_post_1)
+    db.session.add(brian_post_2)
 
     # commit transaction
     db.session.commit()

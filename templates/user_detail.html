@@ -12,5 +12,13 @@
         <button class="btn btn-danger">DELETE USER</button>
     </form>
 </div>
+<div id="posts">
+    <h2>POSTS</h2>
+    <ul>
+        {% for post in posts %}
+        <li><a href="/posts/{{ post.id }}">{{post.title}}</a></li>
+        {% endfor %}
+    </ul>
+</div>
 
 {% endblock %}

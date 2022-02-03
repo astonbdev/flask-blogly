@@ -63,8 +63,10 @@ class UserViewTestCase(TestCase):
 
     def test_delete_user(self):
         """tests show_delete_user()"""
+        # test for delete something that doesnt exist
         with self.client as c:
-            resp = c.post(f"/users/{self.user_id}/delete")
+            resp = c.post(f"/users/{self.user_id}/delete",
+                          follow_redirects=True)
             self.assertEqual(resp.status_code, 302)
             html = resp.get_data(as_text=True)
             self.assertNotIn("test_first", html)
@@ -97,6 +99,7 @@ class UserViewTestCase(TestCase):
 
     def test_edit_user(self):
         """tests edit_user() post"""
+        # consider the sad path!
         with self.client as c:
             resp = c.post(f"/users/new",
                           data=dict(

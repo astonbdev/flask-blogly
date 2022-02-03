@@ -11,15 +11,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = "oh-so-secret"
 
-debug = DebugToolbarExtension(app)
+#debug = DebugToolbarExtension(app)
 
 
 connect_db(app)
 
 seed_database(db)
 
+empty_user = User(img_url="")
+
+
 @app.get("/")
 def show_homepage():
+    """Shows homepage"""
+
     return redirect("/users")
 
 
@@ -27,54 +32,102 @@ def show_homepage():
 def show_user_list():
     """shows users of blog"""
 
-    user_data = User.query.all()
+    user_data = User.query.order_by("id").all()
 
-    return render_template("user_listing.html", users = user_data)
+    return render_template("user_listing.html", users=user_data)
 
 
 @app.get("/users/new")
 def show_add_user():
     """Shows add user form page"""
 
-    return render_template("add_user.html")
+    action_type = "/users/new"
+
+    return render_template("edit_user.html", title="Add User", user=empty_user, action=action_type)
+
 
 @app.post("/users/new")
 def add_new_user():
     """Adds new user to database"""
-    if request.form["img_url"] == "":
+
+    add_user(request.form)
+
+    return redirect("/users")
+
+
+@app.get("/users/<int:user_id>")
+def show_user(user_id):
+    """Shows specific <user_id> details"""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template("user_detail.html", user=user)
+
+
+@app.get("/users/<int:user_id>/edit")
+def show_edit_user(user_id):
+    """Shows user edit form"""
+
+    action_type = f"/users/{user_id}/edit"
+
+    return render_template("edit_user.html",
+                           title="Edit User",
+                           user=User.query.get_or_404(user_id),
+                           action=action_type)
+
+
+@app.post("/users/<user_id>/edit")
+def edit_user(user_id):
+    """Edits user data"""
+
+    edit_user(request.form, user_id)
+
+    return redirect("/users")
+
+
+@app.post("/users/<user_id>/delete")
+def delete_user(user_id):
+    """Removes user data from db"""
+
+    User.query.filter(User.id == user_id).delete()
+
+    db.session.commit()
+
+    return redirect("/users")
+
+
+def add_user(user_data):
+    """takes array of user data, and creates new User
+    object, adding to db"""
+
+    if user_data["img_url"] == "":
         new_user = User(
-            first_name = request.form["first_name"],
-            last_name = request.form["last_name"]
+            first_name=user_data["first_name"],
+            last_name=user_data["last_name"]
         )
     else:
         new_user = User(
-            first_name = request.form["first_name"],
-            last_name = request.form["last_name"],
-            img_url = request.form["img_url"]
+            first_name=user_data["first_name"],
+            last_name=user_data["last_name"],
+            img_url=user_data["img_url"]
         )
 
     db.session.add(new_user)
     db.session.commit()
 
-    return redirect("/users")
 
-@app.get("/users/<int:user_id>")
-def show_user(user_id):
-    """shows specific <user_id> details"""
+def edit_user(new_user_data, user_id):
+    """Queries db for user_id, alters information
+    based on passed new_user_data"""
 
-    user = User.query.get(user_id)
-    return render_template("user_detail.html", user = user)
+    user = User.query.get_or_404(user_id)
 
-@app.get("/users/<user_id>/edit")
-def show_edit_user(user_id):
-    """Shows user edit form"""
+    user.first_name = new_user_data["first_name"]
+    user.last_name = new_user_data["last_name"]
 
-    return render_template("edit_user.html")
+    if new_user_data != "":
+        user.img_url = new_user_data["img_url"]
+    else:
+        user.img_url = "/static/default_pic.png"
 
-@app.post("/users/<user_id>/edit")
-def edit_user(user_id):
-    return
-
-@app.post("/users/<user_id>/delete")
-def delete_user(user_id):
-    return
+    db.session.commit()

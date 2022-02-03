@@ -1,6 +1,9 @@
 """Models for Blogly."""
 
+from filecmp import DEFAULT_IGNORES
 from flask_sqlalchemy import SQLAlchemy
+
+DEFAULT_IMAGE_URL = "/static/default_pic.png"
 
 db = SQLAlchemy()
 
@@ -17,14 +20,14 @@ class User(db.Model):
                    autoincrement=True)
 
     first_name = db.Column(db.String(50),
-                          nullable = False)
+                           nullable=False)
 
     last_name = db.Column(db.String(50),
-                         nullable = False)
+                          nullable=False)
 
     img_url = db.Column(db.Text,
-                        nullable = False,
-                        default="/static/default_pic.png")
+                        nullable=False,
+                        default=DEFAULT_IMAGE_URL)
 
     def __repr__(self):
         return f"<User {self.first_name} {self.last_name}"
@@ -38,4 +41,3 @@ def connect_db(app):
 
     db.app = app
     db.init_app(app)
-

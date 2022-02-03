@@ -1,8 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-
+<h3>{{ title }} Form</h3>
+<form id="add-user" action="{{ action }}" name="add-user" method="POST">
+    <label id="f-name">First Name:
+        <input name="first_name" value="{{ user.first_name }}">
+    </label>
+    <br>
+    <label name="l-name">Last Name:
+        <input name="last_name" value="{{ user.last_name }}">
+    </label>
+    <br>
+    <label>Profile Img URL
+        <input type="url" name="img_url" value="{{ user.img_url }}">
+    </label>
+    <br>
+    <button class="btn btn-primary" id="submit">Submit</button>
+</form>
 
 {% endblock %}

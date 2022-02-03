@@ -3,12 +3,14 @@
 {% block title %}{{ user.get_full_name() }}{% endblock %}
 
 {% block content %}
+
 <h1>{{ user.get_full_name() }}</h1>
 <img src="{{ user.img_url }}">
-<form type="submit" id="edit" action="/users/{{ user.id }}/edit">
-    <button>EDIT USER</button>
-</form>
-<form id="delete" action = "/users/{{ user.id }}/delete">
-    <button>DELETE USER</button>
-</form>
+<div class="user-form">
+    <a id="submit" class="btn btn-primary" href="/users/{{ user.id }}/edit">EDIT USER</a>
+    <form id="delete" action="/users/{{ user.id }}/delete" method="POST">
+        <button class="btn btn-danger">DELETE USER</button>
+    </form>
+</div>
+
 {% endblock %}

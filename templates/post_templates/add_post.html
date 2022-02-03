@@ -5,14 +5,16 @@
 {% block content %}
 
 <h1>Add Post</h1>
-<form action="users/{{user.id}}/posts/new">
+<form action="/users/{{user.id}}/posts/new" method="POST">
     <label name="title">Title</label>
     <br>
     <input name="title">
     <br>
     <label name="content">Content</label>
     <br>
-    <input name="content" class="content-form">
+    <textarea name="content" class="content-form"></textarea>
+    <br>
+    <button class = "btn btn-primary">Submit</button>
 </form>
 
 {% endblock %}

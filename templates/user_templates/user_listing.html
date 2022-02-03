@@ -3,6 +3,11 @@
 {% block title %}User List{% endblock %}
 
 {% block content %}
+{% for msg in get_flashed_messages() %}
+<p>{{msg}}</p>
+<br>
+{% endfor %}
+<br>
 <h1> USERS </h1>
 <ul>
 {% for user in users %}
